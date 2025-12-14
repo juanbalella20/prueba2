@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego Impostor Fútbol</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .container { text-align: center; padding: 20px; border-radius: 8px; background-color: white; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); }
+    h1 { font-size: 24px; margin-bottom: 20px; }
+    .input { margin-bottom: 20px; padding: 10px; font-size: 18px; width: 100%; }
+    button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 18px; }
+    button:disabled { background-color: #ccc; }
+    .player-info { font-size: 20px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Juego de Impostores - Fútbol</h1>
+    <p>¡Elige jugadores y impostores para el juego!</p>
+    <input id="numPlayers" class="input" type="number" placeholder="Número de jugadores (2-10)" min="2" max="10">
+    <input id="numImpostors" class="input" type="number" placeholder="Número de impostores (0-9)" min="0" max="9">
+    <button id="startBtn" onclick="startGame()">Iniciar Juego</button>
+    <div id="playerInfo" class="player-info"></div>
+    <div id="roles" class="player-info"></div>
+  </div>
+
+  <script>
+    const playersList = [
+      "Lionel Messi", "Diego Maradona", "Ángel Di María", "Sergio Agüero", "Julián Álvarez", "Lautaro Martínez", "Emiliano 'Dibu' Martínez", 
+      "Gonzalo Higuaín", "Carlos Tévez", "Javier Mascherano", "Juan Román Riquelme", "Gabriel Batistuta", "Pablo Aimar", "Ariel Ortega", 
+      "Esteban Cambiasso", "Fernando Redondo", "Diego Simeone", "Oscar Ruggeri", "Walter Samuel", "Roberto Ayala", "Hernán Crespo", 
+      "Lisandro Martínez", "Cristian Romero", "Nicolás Otamendi", "Leandro Paredes", "Rodrigo De Paul", "Enzo Fernández", "Alexis Mac Allister", 
+      "Paulo Dybala", "Javier Zanetti", "Claudio Caniggia", "Martín Palermo", "Sergio Goycochea", "Mario Kempes", "Daniel Passarella"
+    ];
+
+    function startGame() {
+      let numPlayers = parseInt(document.getElementById("numPlayers").value);
+      let numImpostors = parseInt(document.getElementById("numImpostors").value);
+
+      // Validación de inputs
+      if (isNaN(numPlayers) || isNaN(numImpostors) || numPlayers < 2 || numImpostors < 0 || numImpostors >= numPlayers) {
+        alert("Por favor, ingrese valores válidos.");
+        return;
+      }
+
+      // Seleccionamos los jugadores de la lista
+      let selectedPlayers = [];
+      while (selectedPlayers.length < numPlayers) {
+        let randomPlayer = playersList[Math.floor(Math.random() * playersList.length)];
+        if (!selectedPlayers.includes(randomPlayer)) selectedPlayers.push(randomPlayer);
+      }
+
+      // Asignamos roles
+      let roles = new Array(numPlayers).fill("Tripulante");
+      for (let i = 0; i < numImpostors; i++) {
+        let impostorIndex = Math.floor(Math.random() * numPlayers);
+        roles[impostorIndex] = "Impostor";
+      }
+
+      // Mostrar jugadores y roles
+      let playerInfo = "";
+      let rolesInfo = "";
+      for (let i = 0; i < numPlayers; i++) {
+        playerInfo += `<p>Jugador: ${selectedPlayers[i]}</p>`;
+        rolesInfo += `<p>${selectedPlayers[i]} es un ${roles[i]}</p>`;
+      }
+
+      document.getElementById("playerInfo").innerHTML = playerInfo;
+      document.getElementById("roles").innerHTML = rolesInfo;
+
+      document.getElementById("startBtn").disabled = true;
+    }
+  </script>
+</body>
+</html>
