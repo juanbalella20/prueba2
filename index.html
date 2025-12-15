@@ -1,76 +1,547 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Juego Impostor Fútbol</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Impostor - Fútbol Argentino</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-    .container { text-align: center; padding: 20px; border-radius: 8px; background-color: white; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); }
-    h1 { font-size: 24px; margin-bottom: 20px; }
-    .input { margin-bottom: 20px; padding: 10px; font-size: 18px; width: 100%; }
-    button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 18px; }
-    button:disabled { background-color: #ccc; }
-    .player-info { font-size: 20px; margin: 20px 0; }
+    :root { color-scheme: dark; }
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#0b0e14; color:#e9eef7;
+      display:flex; min-height:100vh; align-items:center; justify-content:center;
+      padding:18px;
+    }
+    .app{
+      width:min(900px, 100%);
+      background:#111827;
+      border:1px solid #233046;
+      border-radius:18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    header{
+      padding:18px 18px 14px;
+      border-bottom:1px solid #233046;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    }
+    header h1{ margin:0; font-size:20px; letter-spacing:.2px; }
+    header p{ margin:8px 0 0; color:#b7c2d6; font-size:13px; line-height:1.35; }
+    main{ padding:18px; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .card{
+      background:#0f172a;
+      border:1px solid #233046;
+      border-radius:16px;
+      padding:14px;
+      flex: 1 1 260px;
+      min-width: 260px;
+    }
+    .card h2{ margin:0 0 10px; font-size:15px; color:#d7e2f7; }
+    label{ display:block; font-size:13px; color:#b7c2d6; margin:10px 0 6px; }
+    input, select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid #2b3a57;
+      background:#0b1222;
+      color:#e9eef7;
+      outline:none;
+    }
+    input:focus, select:focus{ border-color:#4b6bff; }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    button{
+      border:0;
+      border-radius:14px;
+      padding:10px 14px;
+      font-weight:650;
+      cursor:pointer;
+      background:#2a3a5a;
+      color:#e9eef7;
+      transition: transform .05s ease, filter .15s ease;
+    }
+    button:hover{ filter:brightness(1.08); }
+    button:active{ transform: translateY(1px); }
+    .primary{ background:#3a57ff; }
+    .danger{ background:#ff3a4f; }
+    .ghost{ background:transparent; border:1px solid #2b3a57; }
+    .muted{ color:#b7c2d6; font-size:13px; line-height:1.4; }
+    .big{
+      text-align:center;
+      padding:22px 14px;
+      border-radius:18px;
+      border:1px dashed #2b3a57;
+      background: rgba(255,255,255,.03);
+    }
+    .big .who{ font-size:16px; color:#b7c2d6; margin-bottom:10px; }
+    .big .reveal{
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:.3px;
+      margin:8px 0;
+    }
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #2b3a57;
+      background:#0b1222;
+      color:#b7c2d6;
+      font-size:12px;
+      margin-right:8px;
+    }
+    .list{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .playerBtn{
+      text-align:left;
+      width:100%;
+      padding:12px 12px;
+      border-radius:16px;
+      background:#101b33;
+      border:1px solid #233046;
+    }
+    .playerBtn small{ display:block; color:#b7c2d6; font-weight:500; margin-top:4px; }
+    .footer{
+      padding:14px 18px;
+      border-top:1px solid #233046;
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      color:#b7c2d6; font-size:13px;
+    }
+    .hidden{ display:none !important; }
+
+    /* modal */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:flex; align-items:center; justify-content:center;
+      padding:18px;
+    }
+    .modal{
+      width:min(520px, 100%);
+      background:#0f172a;
+      border:1px solid #233046;
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+    .modal h3{ margin:0 0 8px; font-size:16px; }
+    .modal p{ margin:0 0 12px; color:#b7c2d6; font-size:13px; line-height:1.4; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Juego de Impostores - Fútbol</h1>
-    <p>¡Elige jugadores y impostores para el juego!</p>
-    <input id="numPlayers" class="input" type="number" placeholder="Número de jugadores (2-10)" min="2" max="10">
-    <input id="numImpostors" class="input" type="number" placeholder="Número de impostores (0-9)" min="0" max="9">
-    <button id="startBtn" onclick="startGame()">Iniciar Juego</button>
-    <div id="playerInfo" class="player-info"></div>
-    <div id="roles" class="player-info"></div>
+  <div class="app">
+    <header>
+      <h1>Impostor — Fútbol Argentino</h1>
+      <p>Modo “pasá el celu”: cada jugador toca <b>Revelar</b> para ver su rol, luego <b>Pasar</b>. Después, por ronda se elimina 1 jugador (elegís vos).</p>
+    </header>
+
+    <main>
+      <!-- SETUP -->
+      <section id="screen-setup" class="row">
+        <div class="card">
+          <h2>Configuración</h2>
+          <label for="numPlayers">Cantidad de jugadores</label>
+          <input id="numPlayers" type="number" min="3" max="20" value="6" />
+
+          <label for="numImpostors">Cantidad de impostores</label>
+          <input id="numImpostors" type="number" min="1" max="19" value="2" />
+
+          <div class="btns">
+            <button class="primary" id="btnStart">Empezar</button>
+            <button class="ghost" id="btnQuick">Auto (8 jugadores, 2 impostores)</button>
+          </div>
+          <p class="muted" id="setupHint" style="margin-top:10px;"></p>
+        </div>
+
+        <div class="card">
+          <h2>Cómo se gana</h2>
+          <p class="muted">
+            • Si <b>no quedan impostores</b> → ganan los jugadores.<br/>
+            • Si <b>impostores ≥ jugadores normales</b> → ganan los impostores.<br/><br/>
+            Podés terminar manualmente cuando quieras.
+          </p>
+        </div>
+      </section>
+
+      <!-- REVEAL -->
+      <section id="screen-reveal" class="hidden">
+        <div class="big">
+          <div class="who" id="revealWho">Jugador 1</div>
+          <div class="reveal" id="revealText">Tocá “Revelar”</div>
+          <div class="muted" id="revealSub">Que nadie mire la pantalla.</div>
+          <div class="btns" style="justify-content:center; margin-top:14px;">
+            <button class="primary" id="btnReveal">Revelar</button>
+            <button id="btnNext" class="hidden">Pasar</button>
+          </div>
+        </div>
+        <div style="margin-top:12px;" class="muted">
+          <span class="pill" id="pillPlayers"></span>
+          <span class="pill" id="pillImpostors"></span>
+          <span class="pill" id="pillProgress"></span>
+        </div>
+        <div class="btns" style="margin-top:12px;">
+          <button class="ghost" id="btnRestart1">Reiniciar</button>
+        </div>
+      </section>
+
+      <!-- GAME -->
+      <section id="screen-game" class="hidden">
+        <div class="row">
+          <div class="card" style="flex: 1 1 420px;">
+            <h2>Ronda <span id="roundNum">1</span> — Elegí a quién eliminar</h2>
+            <p class="muted">Tocá un nombre para eliminarlo (1 por ronda). Los roles quedan ocultos.</p>
+            <div class="list" id="aliveList"></div>
+          </div>
+
+          <div class="card" style="flex: 1 1 260px;">
+            <h2>Estado</h2>
+            <p class="muted" id="statusText"></p>
+            <div class="btns">
+              <button class="ghost" id="btnShowSummary">Resumen (sin roles)</button>
+              <button class="danger" id="btnEnd">Terminar partida</button>
+              <button class="ghost" id="btnRestart2">Reiniciar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer">
+      <div>Hecho para GitHub Pages: 1 archivo HTML + JS.</div>
+      <div class="muted">Tip: si algo queda raro, recargá (Ctrl+F5).</div>
+    </div>
   </div>
 
-  <script>
-    const playersList = [
-      "Lionel Messi", "Diego Maradona", "Ángel Di María", "Sergio Agüero", "Julián Álvarez", "Lautaro Martínez", "Emiliano 'Dibu' Martínez", 
-      "Gonzalo Higuaín", "Carlos Tévez", "Javier Mascherano", "Juan Román Riquelme", "Gabriel Batistuta", "Pablo Aimar", "Ariel Ortega", 
-      "Esteban Cambiasso", "Fernando Redondo", "Diego Simeone", "Oscar Ruggeri", "Walter Samuel", "Roberto Ayala", "Hernán Crespo", 
-      "Lisandro Martínez", "Cristian Romero", "Nicolás Otamendi", "Leandro Paredes", "Rodrigo De Paul", "Enzo Fernández", "Alexis Mac Allister", 
-      "Paulo Dybala", "Javier Zanetti", "Claudio Caniggia", "Martín Palermo", "Sergio Goycochea", "Mario Kempes", "Daniel Passarella"
-    ];
+  <!-- MODAL -->
+  <div id="overlay" class="overlay hidden">
+    <div class="modal">
+      <h3 id="modalTitle">Ronda terminada</h3>
+      <p id="modalBody">¿Seguimos?</p>
+      <div class="btns" style="justify-content:flex-end;">
+        <button class="ghost" id="modalNo">Terminar</button>
+        <button class="primary" id="modalYes">Seguir</button>
+      </div>
+    </div>
+  </div>
 
-    function startGame() {
-      let numPlayers = parseInt(document.getElementById("numPlayers").value);
-      let numImpostors = parseInt(document.getElementById("numImpostors").value);
+<script>
+(() => {
+  // Pool de futbolistas argentinos famosos (mezcla de épocas)
+  const PLAYER_POOL = [
+    "Lionel Messi","Diego Maradona","Gabriel Batistuta","Juan Román Riquelme","Javier Zanetti",
+    "Daniel Passarella","Mario Kempes","Hernán Crespo","Carlos Tévez","Sergio Agüero",
+    "Ángel Di María","Julián Álvarez","Emiliano Martínez","Ariel Ortega","Claudio Caniggia",
+    "Javier Mascherano","Esteban Cambiasso","Fernando Redondo","Roberto Ayala","Oscar Ruggeri",
+    "Walter Samuel","Pablo Aimar","Gonzalo Higuaín","Lisandro Martínez","Cristian Romero",
+    "Juan Sebastián Verón","Martín Palermo","Fernando Gago","Rodrigo De Paul","Enzo Fernández",
+    "Alexis Mac Allister","Nicolás Otamendi","Carlos Bilardo","César Menotti","Sergio Goycochea"
+  ];
 
-      // Validación de inputs
-      if (isNaN(numPlayers) || isNaN(numImpostors) || numPlayers < 2 || numImpostors < 0 || numImpostors >= numPlayers) {
-        alert("Por favor, ingrese valores válidos.");
-        return;
-      }
+  // UI
+  const screens = {
+    setup: document.getElementById("screen-setup"),
+    reveal: document.getElementById("screen-reveal"),
+    game: document.getElementById("screen-game"),
+  };
 
-      // Seleccionamos los jugadores de la lista
-      let selectedPlayers = [];
-      while (selectedPlayers.length < numPlayers) {
-        let randomPlayer = playersList[Math.floor(Math.random() * playersList.length)];
-        if (!selectedPlayers.includes(randomPlayer)) selectedPlayers.push(randomPlayer);
-      }
+  const numPlayersEl = document.getElementById("numPlayers");
+  const numImpostorsEl = document.getElementById("numImpostors");
+  const setupHintEl = document.getElementById("setupHint");
 
-      // Asignamos roles
-      let roles = new Array(numPlayers).fill("Tripulante");
-      for (let i = 0; i < numImpostors; i++) {
-        let impostorIndex = Math.floor(Math.random() * numPlayers);
-        roles[impostorIndex] = "Impostor";
-      }
+  const revealWhoEl = document.getElementById("revealWho");
+  const revealTextEl = document.getElementById("revealText");
+  const revealSubEl = document.getElementById("revealSub");
+  const btnReveal = document.getElementById("btnReveal");
+  const btnNext = document.getElementById("btnNext");
 
-      // Mostrar jugadores y roles
-      let playerInfo = "";
-      let rolesInfo = "";
-      for (let i = 0; i < numPlayers; i++) {
-        playerInfo += `<p>Jugador: ${selectedPlayers[i]}</p>`;
-        rolesInfo += `<p>${selectedPlayers[i]} es un ${roles[i]}</p>`;
-      }
+  const pillPlayers = document.getElementById("pillPlayers");
+  const pillImpostors = document.getElementById("pillImpostors");
+  const pillProgress = document.getElementById("pillProgress");
 
-      document.getElementById("playerInfo").innerHTML = playerInfo;
-      document.getElementById("roles").innerHTML = rolesInfo;
+  const aliveList = document.getElementById("aliveList");
+  const statusText = document.getElementById("statusText");
+  const roundNumEl = document.getElementById("roundNum");
 
-      document.getElementById("startBtn").disabled = true;
+  const overlay = document.getElementById("overlay");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBody = document.getElementById("modalBody");
+  const modalYes = document.getElementById("modalYes");
+  const modalNo = document.getElementById("modalNo");
+
+  // Buttons
+  document.getElementById("btnStart").addEventListener("click", () => startGame(false));
+  document.getElementById("btnQuick").addEventListener("click", () => startGame(true));
+  document.getElementById("btnRestart1").addEventListener("click", resetAll);
+  document.getElementById("btnRestart2").addEventListener("click", resetAll);
+  document.getElementById("btnEnd").addEventListener("click", () => endWithMessage("Partida terminada", "La terminaste manualmente."));
+
+  document.getElementById("btnShowSummary").addEventListener("click", () => {
+    const alive = state.players.filter(p => p.alive);
+    const txt = alive.map((p, i) => `${i+1}. ${p.displayName}`).join("\n");
+    alert(`Vivos (${alive.length}):\n\n${txt}`);
+  });
+
+  // Game state
+  const state = {
+    totalPlayers: 0,
+    impostors: 0,
+    players: [], // {id, displayName:"Jugador 1", roleName:"Messi" or "IMPOSTOR", isImpostor, alive:true}
+    revealIndex: 0,
+    revealedThisTurn: false,
+    round: 1
+  };
+
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.add("hidden"));
+    screens[name].classList.remove("hidden");
+  }
+
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  function validateSetup(nPlayers, nImpostors){
+    if (!Number.isFinite(nPlayers) || !Number.isFinite(nImpostors)) return "Ingresá números válidos.";
+    if (nPlayers < 3) return "Mínimo 3 jugadores.";
+    if (nPlayers > 20) return "Máximo 20 jugadores.";
+    if (nImpostors < 1) return "Mínimo 1 impostor.";
+    if (nImpostors >= nPlayers) return "Los impostores deben ser menos que los jugadores.";
+    if (nPlayers > PLAYER_POOL.length) return "Pool insuficiente (subí más nombres al listado).";
+    return "";
+  }
+
+  function startGame(quick){
+    let nPlayers = quick ? 8 : parseInt(numPlayersEl.value, 10);
+    let nImpostors = quick ? 2 : parseInt(numImpostorsEl.value, 10);
+
+    nPlayers = clamp(nPlayers, 3, 20);
+    nImpostors = clamp(nImpostors, 1, 19);
+
+    const err = validateSetup(nPlayers, nImpostors);
+    if (err){
+      setupHintEl.textContent = "⚠️ " + err;
+      return;
     }
-  </script>
+    setupHintEl.textContent = "";
+
+    state.totalPlayers = nPlayers;
+    state.impostors = nImpostors;
+    state.revealIndex = 0;
+    state.revealedThisTurn = false;
+    state.round = 1;
+
+    // Build assignments
+    const pool = shuffle([...PLAYER_POOL]).slice(0, nPlayers);
+    const impostorIdx = new Set(shuffle([...Array(nPlayers).keys()]).slice(0, nImpostors));
+
+    state.players = Array.from({length:nPlayers}, (_, i) => {
+      const isImp = impostorIdx.has(i);
+      return {
+        id: i+1,
+        displayName: `Jugador ${i+1}`,
+        roleName: isImp ? "IMPOSTOR" : pool[i],
+        isImpostor: isImp,
+        alive: true
+      };
+    });
+
+    // Reveal screen
+    pillPlayers.textContent = `Jugadores: ${nPlayers}`;
+    pillImpostors.textContent = `Impostores: ${nImpostors}`;
+    updateRevealUI(true);
+    showScreen("reveal");
+  }
+
+  function updateRevealUI(resetText){
+    const i = state.revealIndex;
+    revealWhoEl.textContent = `Jugador ${i+1}`;
+    pillProgress.textContent = `Revelación: ${i+1}/${state.totalPlayers}`;
+
+    if (resetText){
+      revealTextEl.textContent = "Tocá “Revelar”";
+      revealSubEl.textContent = "Que nadie mire la pantalla.";
+      btnReveal.classList.remove("hidden");
+      btnNext.classList.add("hidden");
+      state.revealedThisTurn = false;
+    }
+  }
+
+  btnReveal.addEventListener("click", () => {
+    const p = state.players[state.revealIndex];
+    state.revealedThisTurn = true;
+
+    revealTextEl.textContent = p.isImpostor ? "IMPOSTOR" : p.roleName;
+    revealSubEl.textContent = p.isImpostor ? "Tu objetivo: pasar desapercibido." : "Sos un jugador normal.";
+    btnReveal.classList.add("hidden");
+    btnNext.classList.remove("hidden");
+  });
+
+  btnNext.addEventListener("click", () => {
+    if (!state.revealedThisTurn) return;
+
+    if (state.revealIndex < state.totalPlayers - 1){
+      state.revealIndex += 1;
+      updateRevealUI(true);
+      return;
+    }
+
+    // Finish reveal => go to gameplay
+    showScreen("game");
+    renderGame();
+  });
+
+  function renderGame(){
+    roundNumEl.textContent = String(state.round);
+
+    const alive = state.players.filter(p => p.alive);
+    const aliveImpostors = alive.filter(p => p.isImpostor).length;
+    const aliveNormals = alive.length - aliveImpostors;
+
+    statusText.textContent =
+      `Vivos: ${alive.length}\n` +
+      `Ronda: ${state.round}\n` +
+      `Condición de victoria:\n` +
+      `- Jugadores ganan si impostores = 0.\n` +
+      `- Impostores ganan si impostores ≥ jugadores normales.\n\n` +
+      `Tip: elegí a quién eliminar tocando su botón.`;
+
+    // Victory check
+    const win = checkWin(aliveImpostors, aliveNormals);
+    if (win){
+      endWithMessage("Fin de la partida", win);
+      return;
+    }
+
+    aliveList.innerHTML = "";
+    alive.forEach((p) => {
+      const btn = document.createElement("button");
+      btn.className = "playerBtn";
+      btn.innerHTML = `<strong>${p.displayName}</strong><small>${p.alive ? "Vivo" : "Eliminado"}</small>`;
+      btn.addEventListener("click", () => confirmElimination(p.id));
+      aliveList.appendChild(btn);
+    });
+  }
+
+  function confirmElimination(playerId){
+    const p = state.players.find(x => x.id === playerId);
+    if (!p || !p.alive) return;
+
+    const ok = confirm(`¿Eliminar a ${p.displayName}? (Se elimina 1 por ronda)`);
+    if (!ok) return;
+
+    p.alive = false;
+
+    const alive = state.players.filter(x => x.alive);
+    const aliveImpostors = alive.filter(x => x.isImpostor).length;
+    const aliveNormals = alive.length - aliveImpostors;
+
+    const win = checkWin(aliveImpostors, aliveNormals);
+    if (win){
+      endWithMessage("Fin de la partida", win);
+      return;
+    }
+
+    // Ask continue/stop
+    openModal(
+      "Ronda terminada",
+      `${p.displayName} fue eliminado.\n\n¿Se terminó o seguimos a la próxima ronda?`,
+      () => { // yes
+        state.round += 1;
+        closeModal();
+        renderGame();
+      },
+      () => { // no
+        closeModal();
+        endWithMessage("Partida terminada", "La terminaste después de la ronda.");
+      }
+    );
+  }
+
+  function checkWin(impostors, normals){
+    if (impostors === 0) return "✅ Ganaron los jugadores (no quedan impostores).";
+    if (impostors >= normals) return "☠️ Ganaron los impostores (ya dominan la votación).";
+    return "";
+  }
+
+  function openModal(title, body, onYes, onNo){
+    modalTitle.textContent = title;
+    modalBody.textContent = body;
+
+    // limpiar listeners viejos
+    const yesClone = modalYes.cloneNode(true);
+    const noClone = modalNo.cloneNode(true);
+    modalYes.replaceWith(yesClone);
+    modalNo.replaceWith(noClone);
+
+    yesClone.addEventListener("click", onYes);
+    noClone.addEventListener("click", onNo);
+
+    // reasignar refs
+    window._modalYes = yesClone;
+    window._modalNo = noClone;
+
+    overlay.classList.remove("hidden");
+  }
+
+  function closeModal(){
+    overlay.classList.add("hidden");
+  }
+
+  function endWithMessage(title, message){
+    alert(`${title}\n\n${message}`);
+    // Opcional: mostrar resumen final CON roles
+    const alive = state.players.filter(p => p.alive);
+    const eliminated = state.players.filter(p => !p.alive);
+
+    const lines = [];
+    lines.push("RESUMEN FINAL (roles incluidos):");
+    state.players.forEach(p => {
+      const tag = p.alive ? "VIVO" : "ELIMINADO";
+      const role = p.isImpostor ? "IMPOSTOR" : p.roleName;
+      lines.push(`- ${p.displayName}: ${tag} — ${role}`);
+    });
+
+    const see = confirm("¿Querés ver el resumen final con roles?");
+    if (see) alert(lines.join("\n"));
+
+    resetAll();
+  }
+
+  function resetAll(){
+    // reset UI
+    showScreen("setup");
+    setupHintEl.textContent = "";
+    // reset state
+    state.totalPlayers = 0;
+    state.impostors = 0;
+    state.players = [];
+    state.revealIndex = 0;
+    state.revealedThisTurn = false;
+    state.round = 1;
+    closeModal();
+  }
+
+  function shuffle(arr){
+    for (let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // hint live
+  function refreshHint(){
+    const nPlayers = parseInt(numPlayersEl.value, 10);
+    const nImps = parseInt(numImpostorsEl.value, 10);
+    const err = validateSetup(nPlayers, nImps);
+    setupHintEl.textContent = err ? ("⚠️ " + err) : "Todo listo. Tocá “Empezar”.";
+  }
+  numPlayersEl.addEventListener("input", refreshHint);
+  numImpostorsEl.addEventListener("input", refreshHint);
+  refreshHint();
+})();
+</script>
 </body>
 </html>
